@@ -33,40 +33,67 @@ console.log(
   })
 );
 
-// const stringWithUUIDSchema = z.string([z.uuid()]);
-// console.log(stringWithUUIDSchema.checks);
-// const uuidSchema = z.uuid();
-// console.log(uuidSchema);
-// console.log(stringWithUUIDSchema._parse("testing"));
-// console.log(uuidSchema._parse("testing"));
+const tup = new z.$ZodTuple({
+  checks: [],
+  prefixItems: [str, num],
+  items: null,
+});
+console.log(tup._parse([1243, 1234, "ad"]));
 
-// uuidSchema;
-// console.log(z.number()._parse(1234));
-// console.log(z.number()._parse("1234"));
-// z.string({ message: (issue) => issue.code }).uuid({ message: "Not a uuid. " });
+// Schemas with matchers:
+// ZodEffects;
+// ZodLiteral;
+// ZodEnum;
+// ZodNativeEnum;
+// ZodDefault;
+// ZodUndefined;
+// ZodNull;
+// ZodOptional;
+// ZodNullable;
+// ZodBranded;
+// ZodReadonly;
+// ZodCatch;
 
-// uuidSchema["~output"];
+// const STR: unique symbol = Symbol("string");
+// const NUM: unique symbol = Symbol("number");
+// type Primitive = string | number | bigint | boolean | null | undefined;
+// type AssertPrimitive<T> = T extends Primitive ? T : never;
+// type Part =
+//   | typeof STR
+//   | typeof NUM
+//   | string
+//   | number
+//   | bigint
+//   | boolean
+//   | null
+//   | undefined;
+// type Parts = Array<Part | Parts>;
+// type PartArray = Array<Part>;
+// type PartsToUnion<T extends PartArray> = PartToLiteral<T[number]>;
+// type PartToLiteral<T extends Part> = T extends typeof STR
+//   ? `${string}`
+//   : T extends typeof NUM
+//     ? `${number}`
+//     : `${AssertPrimitive<T>}`;
 
-// console.log(z.string().parse("asdf"));
-// const str = new z.ZodString({
-//   checks: [],
-//   coerce: false,
-// });
-// type lakdsf = z.ZodString;
-// console.log(str.parse("adsf"));
-// // console.log(str.__proto__);
-// // console.log(z.ZodType.prototype);
-// // console.log(z.ZodString.prototype);
-// // console.log(Object.getOwnPropertyDescriptors(z.ZodString.prototype));
-// // console.log(Object.getOwnPropertyDescriptors(z.$ZodString.prototype));
-// // console.log(Object.getOwnPropertyDescriptors(z.ZodType.prototype));
-// Object.defineProperties(
-//   z.ZodString.prototype,
-//   Object.getOwnPropertyDescriptors(z.ZodType.prototype)
-// );
-// // console.log(Object.getOwnPropertyDescriptors(z.ZodString.prototype));
-// console.log(str.optional().__optional.parse("asdf"));
+// type PartsToLiteral<T extends Parts> = T extends []
+//   ? ""
+//   : T extends [infer A extends Part, ...infer B extends Parts]
+//     ? `${PartToLiteral<A>}${PartsToLiteral<B>}`
+//     : T extends [infer A extends PartArray, ...infer B extends Parts]
+//       ? `${PartsToUnion<A>}${PartsToLiteral<B>}`
+//       : never;
 
-// console.log(str instanceof z.$ZodString);
-// console.log(str instanceof z.ZodType);
-// console.log(str instanceof z.ZodString);
+// function templateLiteral<const T extends Parts>(
+//   ...parts: T
+// ): PartsToLiteral<T> {
+//   return parts as any;
+// }
+
+// const result1 = templateLiteral(STR, "stuff", templateLiteral(["a", "b"]));
+// const result = templateLiteral(STR, "stuff", ["a", "b"]);
+// type T1 = PartsToLiteral<[typeof STR, "stuff"]>;
+// type T2 = PartsToLiteral<["a_", "b"]>;
+// type T3 = PartsToLiteral<
+//   [typeof STR, "stuff", (1 | 2 | 3)[], typeof NUM, "_end"]
+// >;

@@ -91,8 +91,8 @@ export interface $ZodTypeDef {
   checks: checks.$ZodCheck<never>[];
 }
 
-export type $ZodDiscriminators = Array<
-  { key: PropertyKey; discs: $ZodDiscriminators } | Set<unknown>
+export type $ZodMatchers = Array<
+  { key: PropertyKey; discs: $ZodMatchers } | Set<unknown>
 >;
 
 export abstract class $ZodType<
@@ -109,9 +109,10 @@ export abstract class $ZodType<
   declare "~optional": unknown;
   declare "~async"?: boolean;
   declare "~def": D;
-  get discriminators(): $ZodDiscriminators | undefined {
-    return undefined;
+  get matchers(): $ZodMatchers | undefined {
+    return [];
   }
+
   // overidden for literals, enum, null, undefined,
   $zod: { version: number } = { version: 4 };
   $zsf: { version: number } = { version: 0 };

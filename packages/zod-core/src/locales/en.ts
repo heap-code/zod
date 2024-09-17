@@ -73,7 +73,7 @@ const errorMap: errors.$ZodErrorMap = (issue) => {
       }
       return `Invalid size, expected ${issue.domain} to be ${issue.expected}${issue.size}`;
 
-    case ZodIssueCode.too_small:
+    case "too_small":
       if (issue.type === "array")
         message = `Array must contain ${
           issue.exact ? "exactly" : issue.inclusive ? `at least` : `more than`
@@ -100,7 +100,7 @@ const errorMap: errors.$ZodErrorMap = (issue) => {
         }${new Date(Number(issue.minimum))}`;
       else message = "Invalid input";
       break;
-    case ZodIssueCode.too_big:
+    case "too_big":
       if (issue.type === "array")
         message = `Array must contain ${
           issue.exact ? `exactly` : issue.inclusive ? `at most` : `less than`
@@ -135,34 +135,34 @@ const errorMap: errors.$ZodErrorMap = (issue) => {
         } ${new Date(Number(issue.maximum))}`;
       else message = "Invalid input";
       break;
-    case ZodIssueCode.custom:
+    case "custom":
       message = `Invalid input`;
       break;
-    case ZodIssueCode.invalid_intersection_types:
+    case "invalid_intersection_types":
       message = `Intersection results could not be merged`;
       break;
-    case ZodIssueCode.not_multiple_of:
+    case "not_multiple_of":
       message = `Number must be a multiple of ${issue.multipleOf}`;
       break;
-    case ZodIssueCode.not_finite:
+    case "not_finite":
       message = "Number must be finite";
       break;
-    case ZodIssueCode.not_unique:
+    case "not_unique":
       message = issue.duplicates?.length
         ? `Element(s): '${issue.duplicates}' not unique`
         : "Values must be unique";
       break;
-    case ZodIssueCode.invalid_file_type:
+    case "invalid_file_type":
       message = `Invalid file type. Expected ${util.joinValues(
         issue.expected
       )}, received '${issue.received}'`;
       break;
-    case ZodIssueCode.invalid_file_name:
+    case "invalid_file_name":
       message = `Invalid file name`;
       break;
     default:
-      message = _ctx.defaultError;
-      util.assertNever(issue);
+      return { message: "Invalid!!!" };
+    // util.assertNever(issue);
   }
 };
 

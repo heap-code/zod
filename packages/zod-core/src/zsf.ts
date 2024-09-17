@@ -81,9 +81,11 @@ export interface $ZSFIntersection extends $ZSF {
   elements: $ZSF[];
 }
 
-export interface $ZSFTuple<T extends $ZSF[]> extends $ZSF {
+export interface $ZSFTuple<PrefixItems extends $ZSF[], Items extends $ZSF>
+  extends $ZSF {
   type: "array";
-  prefixItems: T;
+  prefixItems: PrefixItems;
+  items: Items;
 }
 
 /////////////////////////////////////////////////

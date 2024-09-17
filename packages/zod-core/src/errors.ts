@@ -224,10 +224,10 @@ export type $ZodIssueMultipleOf = _$ZodIssueInvalidValue & {
   input?: types.Numeric;
 };
 
-export interface $ZodIssueInvalidDate extends $ZodIssueBase {
+export type $ZodIssueInvalidDate = _$ZodIssueInvalidValue & {
   expected: "valid_date";
   input?: Date;
-}
+};
 
 export type $ZodInvalidValueIssues =
   | $ZodIssueLessThan

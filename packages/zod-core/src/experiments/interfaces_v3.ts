@@ -1,27 +1,40 @@
 import * as classes from "../classes.js";
 import type * as core from "../core.js";
+import type { ParseContext, ParseReturnType } from "../parse.js";
 
-type AnyZodType = core.$ZodType<{
-  "~output": any;
-  "~input": never;
-}>;
+type AnyZodType = core.$ZodType<unknown, never, core.$ZodTypeDef>;
 type Mix<A extends AnyZodType, B extends AnyZodType> = A & B;
 type Nullable<T> = {
   __nullable: T;
 };
 
-interface ZodType<O, I, Props extends { type: string }>
-  extends core.$ZodType<{
-    "~output": O;
-    "~input": I;
-  }> {
-  type: Props["type"];
+interface ZodTypeDef extends core.$ZodTypeDef {}
+interface ZodType<O, I, D extends ZodTypeDef> extends core.$ZodType<O, I, D> {
   nullable(): Nullable<this>;
 }
 
-export interface ZodString<O extends string, I extends never>
-  extends ZodType<O, I, { type: "string" }> {}
-export class ZodString<O = string, I = never> extends classes.$ZodString<{
-  "~output": O;
-  "~input": I;
-}> {}
+interface ZodStringDef extends classes.$ZodStringDef {}
+export interface ZodString extends ZodType<string, string, ZodStringDef> {
+  type: "string";
+  _parseInput(
+    input: unknown,
+    ctx?: ParseContext
+  ): ParseReturnType<this["~output"]>;
+}
+export class ZodString extends classes.$ZodString<
+  string,
+  string,
+  ZodStringDef
+> {}
+
+interface A {
+  prop(): string | number;
+}
+
+interface B {
+  prop(): string | boolean;
+}
+
+interface C extends A, B {
+  prop(): string;
+}

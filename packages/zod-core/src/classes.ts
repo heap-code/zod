@@ -26,7 +26,7 @@ export class $ZodString<O extends string, I, D extends $ZodStringDef>
   override type = "string" as const;
 
   /** @deprecated Internal API, use with caution. */
-  override _parseInput(
+  protected override _parseInput(
     input: unknown,
     ctx?: parse.ParseContext
   ): parse.ParseReturnType<this["~output"]> {
@@ -713,22 +713,14 @@ export class $ZodObject<Shape extends $ZodRawShape = $ZodRawShape>
     return this.additionalProperties;
   }
 
-  private _cached = util.makeCache(this, {
-    shape() {
-      return this.properties;
-    },
-    keys() {
-      return Object.keys(this.properties);
-    },
-    keyset() {
-      return new Set(Object.keys(this.properties));
-    },
-  });
+  // private _shape = this.properties;
+  // private _keys = Object.keys(this.properties);
+  // private _keyset = new Set(Object.keys(this.properties));
 
-  override get discriminators(): core.$ZodDiscriminators | undefined {
-    const discs: core.$ZodDiscriminators = [];
+  override get matchers(): core.$ZodMatchers | undefined {
+    const discs: core.$ZodMatchers = [];
     for (const key in this.properties) {
-      const _discs = this.properties[key].discriminators;
+      const _discs = this.properties[key].matchers;
       if (_discs) discs.push({ key, discs: _discs });
     }
     return discs.length ? discs : undefined;
@@ -912,16 +904,13 @@ export class $ZodUnion<T extends core.$ZodType[]>
 //   Options extends core.$ZodType[] = core.$ZodType[],
 // > extends $ZodUnionDef<Options> {}
 
-function matchDiscriminators(
-  input: any,
-  discs: core.$ZodDiscriminators
-): boolean {
+function checkMatchers(input: any, discs: core.$ZodMatchers): boolean {
   for (const disc of discs) {
     if (disc instanceof Set) {
       if (!disc.has(input)) return false;
     } else if (disc.key !== null) {
       if (input === undefined) return false;
-      return matchDiscriminators(input[disc.key], disc.discs);
+      return checkMatchers(input[disc.key], disc.discs);
     }
   }
   return true;
@@ -936,8 +925,8 @@ export class $ZodDiscriminatedUnion<
   ): parse.ParseReturnType<this["~output"]> {
     const filteredOptions: core.$ZodType[] = [];
     for (const option of this.elements) {
-      if (!option.discriminators) filteredOptions.push(option);
-      else if (matchDiscriminators(input, option.discriminators)) {
+      if (!option.matchers) filteredOptions.push(option);
+      else if (checkMatchers(input, option.matchers)) {
         filteredOptions.push(option);
       }
     }
@@ -1103,7 +1092,7 @@ export class $ZodIntersection<
 
 export interface $ZodTupleDef<
   Items extends core.$ZodType[] = core.$ZodType[],
-  Rest extends core.$ZodType | null = null,
+  Rest extends core.$ZodType | null = core.$ZodType | null,
 > extends core.$ZodTypeDef {
   prefixItems: Items;
   items: Rest;
@@ -1134,8 +1123,10 @@ type TupleInputType<
   ...(Rest extends core.$ZodType ? Rest["~input"][] : []),
 ];
 
-function handleTupleResults(results: unknown[]): parse.SyncParseReturnType {
-  let fail!: parse.$ZodFailure;
+function handleTupleResults(
+  results: unknown[],
+  fail?: parse.$ZodFailure
+): parse.SyncParseReturnType {
   for (const i in results) {
     const result = results[i];
     if (parse.failed(result)) {
@@ -1148,7 +1139,7 @@ function handleTupleResults(results: unknown[]): parse.SyncParseReturnType {
 
 export class $ZodTuple<
   T extends ZodTupleItems = ZodTupleItems,
-  Rest extends core.$ZodType | null = null,
+  Rest extends core.$ZodType | null = core.$ZodType | null,
 > extends core.$ZodType<
   TupleOutputType<T, Rest>,
   TupleInputType<T, Rest>,
@@ -1175,9 +1166,10 @@ export class $ZodTuple<
       );
     }
 
+    let fail!: parse.$ZodFailure;
     if (!this.items && input.length !== this.prefixItems.length) {
       const tooBig = input.length !== this.prefixItems.length;
-      return parse.$ZodFailure.from(
+      fail = parse.$ZodFailure.from(
         [
           {
             input,
@@ -1210,21 +1202,29 @@ export class $ZodTuple<
       }
     }
 
-    if (!async) return handleTupleResults(results) as this["~output"];
-    return Promise.all(results).then(handleTupleResults) as Promise<
-      this["~output"]
-    >;
+    if (!async) return handleTupleResults(results, fail) as this["~output"];
+    return Promise.all(results).then((results) =>
+      handleTupleResults(results, fail)
+    ) as Promise<this["~output"]>;
   }
 }
 
-// //////////////////////////////////////////
-// //////////////////////////////////////////
-// //////////                      //////////
-// //////////      $ZodRecord      //////////
-// //////////                      //////////
-// //////////////////////////////////////////
-// //////////////////////////////////////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+//////////                      //////////
+//////////      $ZodRecord      //////////
+//////////                      //////////
+//////////////////////////////////////////
+//////////////////////////////////////////
+interface $ZodRecordDef<
+  Key extends core.$ZodType = core.$ZodType,
+  Value extends core.$ZodType = core.$ZodType,
+> extends core.$ZodTypeDef {
+  valueType: Value;
+  keyType: Key;
+}
 
+// type asdf = Record<`key_${string}`, number>
 // export type KeySchema = core.$ZodType<string | number | symbol, any>;
 // export type RecordType<K extends string | number | symbol, V> = [
 //   string,
